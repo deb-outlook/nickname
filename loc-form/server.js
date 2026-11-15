@@ -6,9 +6,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'locations.json');
-const ADMIN_PASSWORD = '360063';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 // Ensure data file exists
 if (!fs.existsSync(DATA_FILE)) {
@@ -130,6 +130,12 @@ const server = http.createServer((req, res) => {
   res.writeHead(404);
   res.end('Not found');
 });
+
+server.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Admin password: ${ADMIN_PASSWORD}`);
+});
+
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
