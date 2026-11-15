@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Form</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 80px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      max-width: 480px;
+      width: 100%;
+      padding: 36px 32px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .warning {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      font-size: 0.88rem;
+      color: #9a3412;
+      line-height: 1.5;
+    }
+
+    .warning strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #c2410c;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: #1d4ed8; }
+    .btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: none;
+    }
+
+    .status.loading {
+      display: block;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .status.success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .nickname-box {
+      margin-top: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+      border: 1px solid #93c5fd;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+    }
+
+    .nickname-box.visible {
+      display: block;
+    }
+
+    .nickname-label {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .nickname-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1e40af;
+      letter-spacing: 0.02em;
+    }
+
+    /* Secret admin button */
+    .secret-btn {
+      position: fixed;
+      bottom: 18px;
+      left: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      color: #64748b;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      z-index: 100;
+    }
+
+    .secret-btn:hover {
+      opacity: 1;
+      background: #cbd5e1;
+    }
+
+    /* Admin modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 1.2rem;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #64748b;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 22px;
+      overflow-y: auto;
+    }
+
+    .password-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .password-form input {
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .password-form button {
+      padding: 12px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .admin-error {
+      color: #dc2626;
+      font-size: 0.9rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .locations-list {
+      display: none;
+    }
+
+    .location-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    .location-item .name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .location-item .coords {
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #334155;
+    }
+
+    .location-item .time {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #64748b;
+      padding: 24px;
+    }
+
+    .count {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hey there !</h1>
+    <p class="subtitle">Please fill in your Name below.</p>
+
+    <div class="warning">
+      <strong>Important Notice</strong>
+      This form will request access to your device location when you submit.
+      Your name and exact coordinates (latitude & longitude) will be permanently saved on our server.
+      By submitting, you consent to this data collection.
+    </div>
+
+    <form id="mainForm">
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" placeholder="Enter your full name" required maxlength="100" autocomplete="name">
+
+      <button type="submit" class="btn" id="submitBtn">Submit</button>
+    </form>
+
+    <div id="status" class="status"></div>
+    <div id="nicknameBox" class="nickname-box">
+      <div class="nickname-label">Your nickname is</div>
+      <div class="nickname-value" id="nicknameValue"></div>
+    </div>
+  </div>
+
+  <!-- Secret admin button -->
+  <button class="secret-btn" id="secretBtn" title="Admin">?</button>
+
+  <!-- Admin Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Admin Access</h2>
+        <button class="close-btn" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="passwordSection" class="password-form">
+          <label for="adminPass">Enter password</label>
+          <input type="password" id="adminPass" placeholder="Password">
+          <button id="loginBtn">Unlock</button>
+          <div class="admin-error" id="adminError">Wrong password</div>
+        </div>
+
+        <div id="locationsSection" class="locations-list">
+          <div class="count" id="countText"></div>
+          <div id="locationsContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('mainForm');
+    const nameInput = document.getElementById('name');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusEl = document.getElementById('status');
+
+    const secretBtn = document.getElementById('secretBtn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const closeModal = document.getElementById('closeModal');
+    const passwordSection = document.getElementById('passwordSection');
+    const locationsSection = document.getElementById('locationsSection');
+    const adminPass = document.getElementById('adminPass');
+    const loginBtn = document.getElementById('loginBtn');
+    const adminError = document.getElementById('adminError');
+    const locationsContainer = document.getElementById('locationsContainer');
+    const countText = document.getElementById('countText');
+
+    const nicknameBox = document.getElementById('nicknameBox');
+    const nicknameValue = document.getElementById('nicknameValue');
+
+    function showStatus(msg, type) {
+      statusEl.textContent = msg;
+      statusEl.className = 'status ' + type;
+    }
+
+    function hideStatus() {
+      statusEl.className = 'status';
+    }
+
+    function hideNickname() {
+      nicknameBox.classList.remove('visible');
+      nicknameValue.textContent = '';
+    }
+
+    function generateNickname() {
+      const prefixes = [
+        'Swift', 'Mighty', 'Cosmic', 'Lucky', 'Brave', 'Silent',
+        'Golden', 'Wild', 'Neon', 'Epic', 'Shadow', 'Blazing',
+        'Crystal', 'Thunder', 'Mystic', 'Iron', 'Solar', 'Frost',
+        'Phantom', 'Rogue', 'Nova', 'Viper', 'Storm', 'Echo'
+      ];
+      const suffixes = [
+        'Wolf', 'Fox', 'Star', 'Rider', 'Ninja', 'Spark',
+        'Wave', 'Bolt', 'Phoenix', 'Hawk', 'Tiger', 'Comet',
+        'Dragon', 'Storm', 'Blade', 'Pulse', 'Nova', 'Ranger',
+        'Ghost', 'Fury', 'Shade', 'Strike', 'Flame', 'Knight'
+      ];
+
+      const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+
+      // Fully random — does not use the user's name
+      const patterns = [
+        () => `${prefix} ${suffix}`,
+        () => `The ${prefix} ${suffix}`,
+        () => `${prefix}${suffix}`,
+        () => `Captain ${suffix}`,
+        () => `${prefix} the ${suffix}`
+      ];
+
+      return patterns[Math.floor(Math.random() * patterns.length)]();
+    }
+
+    // ========== Form submission with required location ==========
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = nameInput.value.trim();
+      if (!name) {
+        showStatus('Please enter your name.', 'error');
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        showStatus('Your browser does not support location services.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Requesting location permission...';
+      hideNickname();
+      showStatus('Please allow location access when your browser asks.', 'loading');
+
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+
+          submitBtn.textContent = 'Saving...';
+          showStatus('Location received. Saving your data...', 'loading');
+
+          try {
+            const res = await fetch('/api/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name,
+                latitude,
+                longitude,
+                accuracy
+              })
+            });
+
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+              const nickname = generateNickname();
+              showStatus('Thank you! Your form has been submitted successfully.', 'success');
+              nicknameValue.textContent = nickname;
+              nicknameBox.classList.add('visible');
+              form.reset();
+            } else {
+              showStatus(result.error || 'Something went wrong. Please try again.', 'error');
+            }
+          } catch (err) {
+            showStatus('Network error. Could not save data.', 'error');
+          }
+
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit';
+        },
+        (error) => {
+          let msg = 'Location access is required to submit this form.';
+          if (error.code === error.PERMISSION_DENIED) {
+            msg = 'You denied location permission. Please allow location access to submit the form.';
+          } else if (error.code === error.TIMEOUT) {
+            msg = 'Location request timed out. Please try again.';
+          }
+          showStatus(msg, 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit';
+        },
+        options
+      );
+    });
+
+    // ========== Admin panel ==========
+    secretBtn.addEventListener('click', () => {
+      modalOverlay.classList.add('visible');
+      passwordSection.style.display = 'flex';
+      locationsSection.style.display = 'none';
+      adminError.style.display = 'none';
+      adminPass.value = '';
+      adminPass.focus();
+    });
+
+    closeModal.addEventListener('click', () => {
+      modalOverlay.classList.remove('visible');
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        modalOverlay.classList.remove('visible');
+      }
+    });
+
+    loginBtn.addEventListener('click', async () => {
+      const password = adminPass.value;
+      adminError.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/locations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          adminError.style.display = 'block';
+          return;
+        }
+
+        // Show locations
+        passwordSection.style.display = 'none';
+        locationsSection.style.display = 'block';
+
+        const locs = data.locations || [];
+        countText.textContent = `Total entries: ${locs.length}`;
+
+        if (locs.length === 0) {
+          locationsContainer.innerHTML = '<div class="empty">No locations saved yet.</div>';
+        } else {
+          // Newest first
+          locs.reverse();
+          locationsContainer.innerHTML = locs.map(loc => `
+            <div class="location-item">
+              <div class="name">${escapeHtml(loc.name)}</div>
+              <div class="coords">
+                Lat: ${loc.latitude.toFixed(7)}<br>
+                Lng: ${loc.longitude.toFixed(7)}
+                ${loc.accuracy ? `<br>Accuracy: ±${Number(loc.accuracy).toFixed(1)} m` : ''}
+              </div>
+              <div class="time">${new Date(loc.timestamp).toLocaleString()}</div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        adminError.textContent = 'Connection error';
+        adminError.style.display = 'block';
+      }
+    });
+
+    adminPass.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
