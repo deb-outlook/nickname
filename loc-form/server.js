@@ -136,8 +136,3 @@ server.listen(PORT, () => {
   console.log(`Admin password: ${ADMIN_PASSWORD}`);
 });
 
-
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log(`Admin password: ${ADMIN_PASSWORD}`);
-});
